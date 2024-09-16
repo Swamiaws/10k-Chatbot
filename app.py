@@ -31,6 +31,7 @@ def ten_k_analyzer(query):
     # Formulate prompt for the Groq LLM based on the query and search results
     prompt = (
         f"Provide a detailed analysis for the following user query: '{query}'. "
+        f"Don't give output in markdown"
         f"Below are the relevant articles and statements gathered from various sources:\n\n{text}"
     )
     
