@@ -1,16 +1,15 @@
 import streamlit as st
-# from dotenv import load_dotenv
 from duckduckgo_search import DDGS
-# import os
 from langchain_groq import ChatGroq
-
-# Load environment variables
-# load_dotenv()
+from langchain.memory import ConversationBufferMemory
 
 # Initialize the LangChain Groq LLM
 llm_groq = ChatGroq(model_name="llama3-70b-8192", api_key=st.secrets["GROQ_API_KEY"])
 
-def ten_k_analyzer(query):
+# Initialize Conversation Buffer Memory
+memory = ConversationBufferMemory()
+
+def ten_k_analyzer(query, memory):
     """
     Searches for relevant articles based on the given query and provides a detailed analysis using the Groq LLM.
     """
@@ -37,6 +36,10 @@ def ten_k_analyzer(query):
     # Invoke the LLM to generate a detailed analysis
     response = llm_groq.invoke(prompt).content
     
+    # Update memory with the current interaction
+    memory.add_message("user", query)
+    memory.add_message("assistant", response)
+    
     return response
 
 # Streamlit app
@@ -49,33 +52,33 @@ def main():
     # Initialize session state
     if "messages" not in st.session_state:
         st.session_state.messages = []
-
+    
     # Display existing chat messages
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"], unsafe_allow_html=True)
-
+    
     # User input area for queries
     if user_query := st.chat_input("Enter your query (e.g., news about a company):"):
         # Add user message to the session
         st.session_state.messages.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.markdown(user_query)
-
+    
         # Show the response from the model
         with st.chat_message("assistant"):
             placeholder = st.empty()
             placeholder.markdown("...")
-
+    
             try:
-                response = ten_k_analyzer(user_query)
+                response = ten_k_analyzer(user_query, memory)
                 placeholder.markdown(response)
                 
                 # Add assistant message to the session
                 st.session_state.messages.append({"role": "assistant", "content": response})
-
+    
             except Exception as e:
                 placeholder.markdown(f"Error: {str(e)}")
- 
+
 if __name__ == "__main__":
     main()
