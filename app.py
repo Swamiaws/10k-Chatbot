@@ -1,14 +1,14 @@
 import streamlit as st
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from duckduckgo_search import DDGS
-import os
+# import os
 from langchain_groq import ChatGroq
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Initialize the LangChain Groq LLM
-llm_groq = ChatGroq(model_name="llama3-70b-8192", api_key=os.getenv("GROQ_API_KEY"))
+llm_groq = ChatGroq(model_name="llama3-70b-8192", api_key=st.secrets["GROQ_API_KEY"])
 
 def ten_k_analyzer(query):
     """
